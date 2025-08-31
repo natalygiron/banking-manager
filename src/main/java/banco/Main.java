@@ -53,7 +53,7 @@ public class Main {
             //CASO APELLIDO NO INGRESADO
             //Client b = svc.registerClient("12345679", "Cesar", "", "b@example.com");
             //CASO CORREO INCORRECTO
-            //Client d = svc.registerClient("12345671", "Ramon", "Perez", "dd.com");
+            Client d = svc.registerClient("12345671", "Ramon", "Perez", "dd.com");
 
             System.out.println("\n== PRUEBA COMPLETA ✅ ==");
 
