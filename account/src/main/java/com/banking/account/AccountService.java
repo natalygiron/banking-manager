@@ -2,6 +2,7 @@ package com.banking.account;
 
 import com.banking.account.dto.request.CreateAccountRequest;
 import com.banking.account.dto.response.ClientResponse;
+import com.banking.account.exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -9,9 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import javax.validation.ValidationException;
 import java.security.SecureRandom;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -44,6 +46,52 @@ public class AccountService {
         Account saved = accountRepository.save(account);
         log.info("Account created: {}", saved.getAccountNumber());
         return saved;
+    }
+
+    @Transactional(readOnly = true)
+    public Account get(Long accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+    }
+
+    @Transactional
+    public Account deposit(Long accountId, double amount) {
+        validateAmount(amount);
+
+        Account account = get(accountId);
+        account.deposit(amount);
+
+        Account updated = accountRepository.save(account);
+        log.info("Deposit of {} made to account {}", amount, updated.getAccountNumber());
+        return updated;
+    }
+
+    @Transactional
+    public Account withdraw(Long accountId, double amount) {
+        validateAmount(amount);
+
+        Account account = get(accountId);
+        account.withdraw(amount);
+
+        Account updated = accountRepository.save(account);
+        log.info("Withdrawal of {} made from account {}", amount, updated.getAccountNumber());
+        return updated;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Account> listAll() {
+        return accountRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Account> listByClient(Long clientId) {
+        return accountRepository.findByClientId(clientId);
+    }
+
+    private void validateAmount(double amount) {
+        if (amount <= 0) {
+            throw new ValidationException("Amount must be greater than 0");
+        }
     }
 
     private void validateRequest(CreateAccountRequest request) {

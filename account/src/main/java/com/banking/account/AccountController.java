@@ -1,16 +1,17 @@
 package com.banking.account;
 
 import com.banking.account.dto.request.CreateAccountRequest;
+import com.banking.account.dto.request.DepositRequest;
+import com.banking.account.dto.request.WithdrawRequest;
 import com.banking.account.dto.response.AccountResponse;
+import com.banking.account.dto.response.BalanceResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -25,5 +26,33 @@ public class AccountController {
         Account account = accountService.createAccount(request);
         log.info("New account registration {}", request);
         return ResponseEntity.ok(AccountResponse.from(account));
+    }
+
+    @PutMapping("/{id}/deposit")
+    public ResponseEntity<BalanceResponse> deposit(@PathVariable Long id,
+                                                   @Valid @RequestBody DepositRequest request) {
+        Account account = accountService.deposit(id, request.getAmount());
+        log.info("New deposit made {}", request);
+        return ResponseEntity.ok(new BalanceResponse(account.getId(), account.getBalance()));
+    }
+
+    @PutMapping("/{id}/withdraw")
+    public ResponseEntity<BalanceResponse> withdraw(@PathVariable Long id,
+                                                    @Valid @RequestBody WithdrawRequest request) {
+        Account account = accountService.withdraw(id, request.getAmount());
+        log.info("New withdraw made {}", request);
+        return ResponseEntity.ok(new BalanceResponse(account.getId(), account.getBalance()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountResponse> get(@PathVariable Long id) {
+        return ResponseEntity.ok(AccountResponse.from(accountService.get(id)));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> list() {
+        return ResponseEntity.ok(
+                accountService.listAll().stream().map(AccountResponse::from).collect(Collectors.toList())
+        );
     }
 }

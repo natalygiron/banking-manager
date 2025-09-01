@@ -40,4 +40,18 @@ public class Account {
         this.balance += amount;
     }
 
+    public void withdraw(double amount) {
+        if (amount <= 0) throw new IllegalArgumentException("Withdraw must be positive");
+
+        double next = balance - amount;
+
+        if (type == AccountType.SAVINGS && next < 0) {
+            throw new IllegalArgumentException("Savings account cannot go negative");
+        }
+        if (type == AccountType.CHECKING && next < -500.0) {
+            throw new IllegalArgumentException("Checking account cannot go below -500");
+        }
+        balance = next;
+    }
+
 }
