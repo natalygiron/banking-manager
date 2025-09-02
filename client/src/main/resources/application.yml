@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: client
+  datasource:
+    url: jdbc:mysql://localhost:3306/bank_clients_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root          # ← tu usuario real
+    password: root          # ← tu contraseña real
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    url:  /openapi/Client-ms-openapi.yml
+    disable-swagger-default-url: true

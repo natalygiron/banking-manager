@@ -1,0 +1,161 @@
+openapi: 3.0.3
+info:
+  title: Account Microservice API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081
+
+paths:
+  /accounts:
+    get:
+      summary: List accounts
+      tags: [Accounts]
+      responses:
+        '200':
+          description: Accounts list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BankAccount'
+    post:
+      summary: Create account
+      tags: [Accounts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankAccount'
+        '400':
+          description: Validation/business error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /accounts/{id}:
+    get:
+      summary: Get by id
+      tags: [Accounts]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankAccount'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete
+      tags: [Accounts]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '204': { description: Deleted }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /accounts/{id}/deposit:
+    put:
+      summary: Deposit
+      tags: [Accounts]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AmountRequest' }
+      responses:
+        '200':
+          description: Updated balance
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BankAccount' }
+        '400':
+          description: Business error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /accounts/{id}/withdraw:
+    put:
+      summary: Withdraw
+      tags: [Accounts]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AmountRequest' }
+      responses:
+        '200': { description: Updated balance }
+        '400': { description: Business rule breach }
+
+components:
+  schemas:
+    AccountType:
+      type: string
+      enum: [SAVINGS, CHECKING]   # ajusta a lo que use el código
+    BankAccount:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        accountNumber: { type: string }
+        balance: { type: number }
+        type: { $ref: '#/components/schemas/AccountType' }
+        overdraftLimit: { type: number }
+        clientId: { type: integer, format: int64 }  # si tu código usa clienteId, cámbialo
+      required: [id, accountNumber, balance, type, clientId]
+    CreateAccountRequest:
+      type: object
+      properties:
+        clientId: { type: integer, format: int64 }  # o clienteId
+        type: { $ref: '#/components/schemas/AccountType' }  # o tipoCuenta
+      required: [clientId, type]
+    AmountRequest:
+      type: object
+      properties:
+        amount: { type: number, minimum: 1 }   # o monto
+      required: [amount]
+    ErrorResponse:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        errors:
+          type: object
+          additionalProperties: { type: string }

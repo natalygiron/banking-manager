@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: client
+  datasource:
+    url: jdbc:h2:mem:bank_clients_db;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    url: /openapi/Client-ms-openapi.yml   # OJO: mismo nombre del archivo
+    disable-swagger-default-url: true
