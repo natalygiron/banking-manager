@@ -2,13 +2,11 @@ package com.banking.client;
 
 import com.banking.client.dto.request.CreateClientRequest;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
 import javax.validation.ValidationException;
-
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -31,14 +29,15 @@ public class ClientService {
                 .dni(createClientRequest.getDni())
                 .build();
 
-        if(isBlank(client.getFirstName()) || isBlank(client.getLastName()) || isBlank(client.getDni()) || isBlank(client.getEmail())){
+        if (isBlank(client.getFirstName()) || isBlank(client.getLastName()) ||
+                isBlank(client.getDni()) || isBlank(client.getEmail())) {
             throw new ValidationException("All fields are required");
         }
-        if(clientRepository.existsByDni(client.getDni())){
+        if (clientRepository.existsByDni(client.getDni())) {
             log.warn("Attempt to register client with existing DNI: {}", client.getDni());
             throw new IllegalArgumentException("Dni is already in use");
         }
-        if(clientRepository.existsByEmail(client.getEmail())){
+        if (clientRepository.existsByEmail(client.getEmail())) {
             log.warn("Attempt to register client with existing email: {}", client.getEmail());
             throw new IllegalArgumentException("Email is already in use");
         }
@@ -92,15 +91,29 @@ public class ClientService {
 
     @Transactional
     public void deleteClient(Long id) {
-//        boolean hasAccounts = !accountRepository.findByOwner_Id(id).isEmpty();
-//        if (hasAccounts) {
-//            throw new IllegalArgumentException("Cannot delete client with active accounts");
-//        }
-        if(!clientRepository.existsById(id)){
+        if (!clientRepository.existsById(id)) {
             log.warn("Attempt to delete client with id: {}", id);
             throw new IllegalArgumentException("Client not found");
         }
+
+        if (clientHasAccounts(id)) {
+            throw new ValidationException("Cannot delete client with active accounts");
+        }
+
         clientRepository.deleteById(id);
+        log.info("Client deleted: {}", id);
     }
 
+    private boolean clientHasAccounts(Long clientId) {
+        final String url = "http://localhost:8081/accounts/" + clientId;
+        try {
+            org.springframework.web.client.RestTemplate rt = new org.springframework.web.client.RestTemplate();
+            var resp = rt.getForEntity(url, java.util.List.class);
+            var body = resp.getBody();
+            return resp.getStatusCode().is2xxSuccessful() && body != null && !body.isEmpty();
+        } catch (Exception e) {
+            log.error("Error querying accounts-service for client {}: {}", clientId, e.getMessage());
+            throw new IllegalStateException("Accounts service unavailable. Try again later.");
+        }
+    }
 }

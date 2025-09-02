@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.validation.ValidationException;
 import java.security.SecureRandom;
 import java.util.List;
@@ -57,10 +57,8 @@ public class AccountService {
     @Transactional
     public Account deposit(Long accountId, double amount) {
         validateAmount(amount);
-
         Account account = get(accountId);
         account.deposit(amount);
-
         Account updated = accountRepository.save(account);
         log.info("Deposit of {} made to account {}", amount, updated.getAccountNumber());
         return updated;
@@ -69,10 +67,8 @@ public class AccountService {
     @Transactional
     public Account withdraw(Long accountId, double amount) {
         validateAmount(amount);
-
         Account account = get(accountId);
         account.withdraw(amount);
-
         Account updated = accountRepository.save(account);
         log.info("Withdrawal of {} made from account {}", amount, updated.getAccountNumber());
         return updated;
@@ -86,6 +82,19 @@ public class AccountService {
     @Transactional(readOnly = true)
     public List<Account> listByClient(Long clientId) {
         return accountRepository.findByClientId(clientId);
+    }
+
+    @Transactional
+    public void delete(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+
+        if (account.getBalance() != 0.0) {
+            throw new ValidationException("Cannot delete account with non-zero balance");
+        }
+
+        accountRepository.delete(account);
+        log.info("Account deleted: {}", account.getAccountNumber());
     }
 
     private void validateAmount(double amount) {
@@ -128,4 +137,3 @@ public class AccountService {
         return String.format("%010d", n);
     }
 }
-

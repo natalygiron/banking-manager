@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -44,15 +45,23 @@ public class AccountController {
         return ResponseEntity.ok(new BalanceResponse(account.getId(), account.getBalance()));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AccountResponse> get(@PathVariable Long id) {
-        return ResponseEntity.ok(AccountResponse.from(accountService.get(id)));
+    @GetMapping("/{clientId}")
+    public ResponseEntity<List<AccountResponse>> getByClient(@PathVariable Long clientId) {
+        List<AccountResponse> accounts = accountService.listByClient(clientId)
+                .stream().map(AccountResponse::from).collect(Collectors.toList());
+        return ResponseEntity.ok(accounts);
     }
 
     @GetMapping
-    public ResponseEntity<?> list() {
+    public ResponseEntity<List<AccountResponse>> list() {
         return ResponseEntity.ok(
                 accountService.listAll().stream().map(AccountResponse::from).collect(Collectors.toList())
         );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        accountService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
