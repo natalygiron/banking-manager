@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 @RestController
-@RequestMapping("api/v1/clients")
+@RequestMapping("clientes")
 public class ClientController {
 
     private final ClientService clientService;

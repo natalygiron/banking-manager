@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("cuentas")
 @AllArgsConstructor
 public class AccountController {
 
@@ -29,7 +29,7 @@ public class AccountController {
         return ResponseEntity.ok(AccountResponse.from(account));
     }
 
-    @PutMapping("/{id}/deposit")
+    @PutMapping("/{id}/depositar")
     public ResponseEntity<BalanceResponse> deposit(@PathVariable Long id,
                                                    @Valid @RequestBody DepositRequest request) {
         Account account = accountService.deposit(id, request.getAmount());
@@ -37,7 +37,7 @@ public class AccountController {
         return ResponseEntity.ok(new BalanceResponse(account.getId(), account.getBalance()));
     }
 
-    @PutMapping("/{id}/withdraw")
+    @PutMapping("/{id}/retirar")
     public ResponseEntity<BalanceResponse> withdraw(@PathVariable Long id,
                                                     @Valid @RequestBody WithdrawRequest request) {
         Account account = accountService.withdraw(id, request.getAmount());
@@ -45,9 +45,9 @@ public class AccountController {
         return ResponseEntity.ok(new BalanceResponse(account.getId(), account.getBalance()));
     }
 
-    @GetMapping("/{clientId}")
-    public ResponseEntity<List<AccountResponse>> getByClient(@PathVariable Long clientId) {
-        List<AccountResponse> accounts = accountService.listByClient(clientId)
+    @GetMapping("/{id}")
+    public ResponseEntity<List<AccountResponse>> getByClient(@PathVariable Long id) {
+        List<AccountResponse> accounts = accountService.listByClient(id)
                 .stream().map(AccountResponse::from).collect(Collectors.toList());
         return ResponseEntity.ok(accounts);
     }
