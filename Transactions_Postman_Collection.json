@@ -1,0 +1,103 @@
+{
+  "info": {
+    "name": "Transactions MS - Entregable 3",
+    "_postman_id": "f4e2e8b8-1c5d-4b4b-9c1a-20250906162812",
+    "description": "Colección para probar el microservicio de transacciones (WebFlux + MongoDB).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Deposito",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transacciones/deposito",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"accountId\": \"ACC-0001\",\n  \"amount\": 200,\n  \"currency\": \"PEN\"\n}"
+        },
+        "description": "Registrar depósito en una cuenta."
+      }
+    },
+    {
+      "name": "Retiro",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transacciones/retiro",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"accountId\": \"ACC-0001\",\n  \"amount\": 50,\n  \"currency\": \"PEN\"\n}"
+        },
+        "description": "Registrar retiro (valida saldo suficiente)."
+      }
+    },
+    {
+      "name": "Transferencia",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transacciones/transferencia",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sourceAccountId\": \"ACC-0001\",\n  \"targetAccountId\": \"ACC-0002\",\n  \"amount\": 30,\n  \"currency\": \"PEN\"\n}"
+        },
+        "description": "Transferencia entre cuentas (valida saldo y existencia de destino)."
+      }
+    },
+    {
+      "name": "Historial",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/transacciones/historial?accountId=ACC-0001&from=2025-01-01T00:00:00Z&to=2025-12-31T23:59:59Z",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "transacciones",
+            "historial"
+          ],
+          "query": [
+            {
+              "key": "accountId",
+              "value": "ACC-0001"
+            },
+            {
+              "key": "from",
+              "value": "2025-01-01T00:00:00Z"
+            },
+            {
+              "key": "to",
+              "value": "2025-12-31T23:59:59Z"
+            }
+          ]
+        },
+        "description": "Consultar historial por cuenta y rango de fechas."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8083",
+      "type": "string"
+    }
+  ]
+}
