@@ -1,0 +1,147 @@
+## Diagrama 1: Flujo de Transferencia entre Cuentas
+```mermaid
+
+sequenceDiagram
+    participant Cliente as Cliente/API Gateway
+    participant Catalogo as Catálogo de Cuentas
+    participant Cuentas as Cuentas & Saldos
+    participant Ledger as Libro Mayor
+    participant EventBus as Event Bus
+
+    autonumber
+    
+    rect rgb(240, 248, 255)
+    Note over Cliente,EventBus: Validación y Preparación
+    Cliente->>Catalogo: GET /account-catalog/accounts/{origenId}
+    Catalogo-->>Cliente: Cuenta origen (estado, límites)
+    
+    Cliente->>Catalogo: GET /account-catalog/accounts/{destinoId}
+    Catalogo-->>Cliente: Cuenta destino (estado)
+    
+    alt Estado de cuenta != ACTIVA
+        Catalogo-->>Cliente: Error: Cuenta no activa
+    else Límites insuficientes
+        Catalogo-->>Cliente: Error: Límites excedidos
+    end
+    end
+
+    rect rgb(240, 255, 240)
+    Note over Cliente,EventBus: Ejecución de Transferencia
+    Cliente->>Cuentas: POST /accounts/transfer
+    Note right of Cuentas: { origenId, destinoId, monto,<br/>referencia, idempotencyKey }
+    
+    Cuentas->>Cuentas: Verificar saldo disponible
+    alt Saldo insuficiente
+        Cuentas-->>Cliente: Error: Saldo insuficiente
+    else Transferencia exitosa
+        Cuentas->>Cuentas: Aplicar débito atómico (origen)
+        Cuentas->>Cuentas: Aplicar crédito atómico (destino)
+        Cuentas-->>Cliente: Transferencia aplicada
+        
+        Cuentas->>EventBus: Publish TransferenciaAplicada
+        Note right of EventBus: { origenId, destinoId, monto,<br/>referencia, timestamp }
+    end
+    end
+
+    rect rgb(255, 248, 240)
+    Note over Cliente,EventBus: Registro Contable
+    EventBus->>Ledger: Event: TransferenciaAplicada
+    Ledger->>Ledger: Crear transacción
+    Ledger->>Ledger: Crear asiento DEBE (cuenta origen)
+    Ledger->>Ledger: Crear asiento HABER (cuenta destino)
+    Ledger-->>EventBus: Transacción registrada
+    end
+```
+
+## Diagrama 2: Flujo de Creación de Cuenta
+
+```mermaid
+sequenceDiagram
+    participant Cliente as Cliente/API Gateway
+    participant Catalogo as Catálogo de Cuentas
+    participant Cuentas as Cuentas & Saldos
+    participant EventBus as Event Bus
+
+    autonumber
+    
+    rect rgb(240, 248, 255)
+    Note over Cliente,EventBus: Creación de Cuenta
+    Cliente->>Catalogo: POST /account-catalog/accounts
+    Note right of Catalogo: { titularId, producto, moneda,<br/>alias, limites }
+    
+    Catalogo->>Catalogo: Validar titular y producto
+    Catalogo->>Catalogo: Aplicar límites por defecto
+    Catalogo->>Catalogo: Crear cuenta en estado PEND_VERIFICACION
+    Catalogo-->>Cliente: Cuenta creada (id, estado)
+    
+    Catalogo->>EventBus: Publish CuentaCreada
+    Note right of EventBus: { cuentaId, titularId, producto,<br/>moneda, estado, timestamp }
+    end
+
+    rect rgb(240, 255, 240)
+    Note over Cliente,EventBus: Inicialización de Saldos
+    EventBus->>Cuentas: Event: CuentaCreada
+    Cuentas->>Cuentas: Inicializar registro de saldos
+    Note right of Cuentas: saldo = 0, saldoDisponible = 0
+    Cuentas-->>EventBus: Saldos inicializados
+    end
+
+    rect rgb(255, 248, 240)
+    Note over Cliente,EventBus: Activación de Cuenta (Post-KYC)
+    Cliente->>Catalogo: PATCH /account-catalog/accounts/{id}/status
+    Note right of Catalogo: { estado: "ACTIVA", motivo }
+    
+    Catalogo->>Catalogo: Validar transición de estado
+    Catalogo->>Catalogo: Actualizar estado a ACTIVA
+    Catalogo-->>Cliente: Estado actualizado
+    
+    Catalogo->>EventBus: Publish CuentaActivada
+    Note right of EventBus: { cuentaId, estado, timestamp }
+    end
+```
+
+## Diagrama 3: Flujo de Depósito con Validación
+
+```mermaid
+sequenceDiagram
+    participant Cliente as Cliente/API Gateway
+    participant Catalogo as Catálogo de Cuentas
+    participant Cuentas as Cuentas & Saldos
+    participant Ledger as Libro Mayor
+    participant EventBus as Event Bus
+
+    autonumber
+    
+    rect rgb(240, 248, 255)
+    Note over Cliente,EventBus: Validación de Cuenta
+    Cliente->>Catalogo: GET /account-catalog/accounts/{id}
+    Catalogo-->>Cliente: Datos de cuenta (estado, políticas)
+    
+    alt Estado != ACTIVA && !permiteDepositoEnBloqueo
+        Catalogo-->>Cliente: Error: Depósito no permitido
+    end
+    end
+
+    rect rgb(240, 255, 240)
+    Note over Cliente,EventBus: Ejecución de Depósito
+    Cliente->>Cuentas: POST /accounts/{id}/deposit
+    Note right of Cuentas: { monto, referencia, idempotencyKey }
+    
+    Cuentas->>Cuentas: Verificar idempotencia
+    Cuentas->>Cuentas: Aplicar crédito
+    Cuentas->>Cuentas: Actualizar saldos
+    Cuentas-->>Cliente: Depósito aplicado
+    
+    Cuentas->>EventBus: Publish MovimientoAplicado
+    Note right of EventBus: { cuentaId, tipo: "DEPOSITO",<br/>monto, referencia, timestamp }
+    end
+
+    rect rgb(255, 248, 240)
+    Note over Cliente,EventBus: Registro Contable
+    EventBus->>Ledger: Event: MovimientoAplicado
+    Ledger->>Ledger: Crear transacción
+    Ledger->>Ledger: Crear asiento HABER (cuenta cliente)
+    Ledger->>Ledger: Crear asiento DEBE (cuenta transitoria)
+    Ledger-->>EventBus: Transacción registrada
+    end
+```
