@@ -1,11 +1,10 @@
-package com.banking.account;
+package com.banking.account.model;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.autoconfigure.integration.IntegrationProperties;
 
 import javax.persistence.*;
 

@@ -1,10 +1,12 @@
-package com.banking.account;
+package com.banking.account.controller;
 
 import com.banking.account.dto.request.CreateAccountRequest;
 import com.banking.account.dto.request.DepositRequest;
 import com.banking.account.dto.request.WithdrawRequest;
 import com.banking.account.dto.response.AccountResponse;
 import com.banking.account.dto.response.BalanceResponse;
+import com.banking.account.model.Account;
+import com.banking.account.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
