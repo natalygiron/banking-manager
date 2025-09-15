@@ -14,7 +14,7 @@
 
   <groupId>com.bootcamp</groupId>
   <artifactId>account-ms</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <name>AccountMS</name>
   <description>Microservicio de cuentas (AccountMS) - Bootcamp</description>
 

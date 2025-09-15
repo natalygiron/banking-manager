@@ -12,6 +12,6 @@ class AccountMsApplicationTests {
 
   @Test
   void contextLoads() {
-    // Si el contexto arranca, este test pasa.
+    // Context should start without DB for basic verification
   }
 }
