@@ -1,8 +1,10 @@
-package com.banking.client;
+package com.banking.client.repository;
+
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import com.banking.client.model.Client;
 
 public interface ClientRepository extends JpaRepository<Client, Long> {
     Optional<Client> findByEmail(String email);

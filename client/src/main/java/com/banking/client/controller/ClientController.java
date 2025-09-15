@@ -1,9 +1,11 @@
-package com.banking.client;
+package com.banking.client.controller;
 
 import com.banking.client.dto.request.CreateClientRequest;
 import com.banking.client.dto.request.PatchClientRequest;
 import com.banking.client.dto.request.UpdateClientRequest;
 import com.banking.client.dto.response.ClientResponse;
+import com.banking.client.model.Client;
+import com.banking.client.service.ClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

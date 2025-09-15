@@ -1,6 +1,6 @@
 package com.banking.client.dto.response;
 
-import com.banking.client.Client;
+import com.banking.client.model.Client;
 import lombok.*;
 
 @Data
