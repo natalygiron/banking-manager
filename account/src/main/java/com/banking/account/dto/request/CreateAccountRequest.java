@@ -1,6 +1,6 @@
 package com.banking.account.dto.request;
 
-import com.banking.account.AccountType;
+import com.banking.account.model.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

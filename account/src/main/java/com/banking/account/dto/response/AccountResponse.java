@@ -1,7 +1,7 @@
 package com.banking.account.dto.response;
 
-import com.banking.account.Account;
-import com.banking.account.AccountType;
+import com.banking.account.model.Account;
+import com.banking.account.model.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
