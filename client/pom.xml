@@ -165,7 +165,6 @@
                 </dependencies>
                 <configuration>
                     <configLocation>src/main/resources/openapi/checkstyle.xml</configLocation>
-                    <encoding>UTF-8</encoding>
                     <consoleOutput>true</consoleOutput>
                     <failOnViolation>true</failOnViolation>
                     <linkXRef>false</linkXRef>

@@ -1,9 +1,9 @@
 package com.banking.client.controller;
 
-import com.banking.client.ClientService;
 import com.banking.client.domain.Client;
 import com.banking.client.dto.request.CreateClientRequest;
 import com.banking.client.dto.request.UpdateClientRequest;
+import com.banking.client.service.ClientService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,8 @@ class ClientControllerTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper om;
 
-    @MockBean ClientService service;
+    @MockBean
+    ClientService service;
 
     @Test
     void create_returns200_and_body() throws Exception {
