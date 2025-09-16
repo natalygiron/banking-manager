@@ -1,9 +1,14 @@
-package com.banking.client;
+package com.banking.client.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import com.banking.client.domain.Client;
+import javax.validation.Valid;
 import com.banking.client.dto.request.CreateClientRequest;
 import com.banking.client.dto.request.PatchClientRequest;
 import com.banking.client.dto.request.UpdateClientRequest;
 import com.banking.client.dto.response.ClientResponse;
+import com.banking.client.service.ClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,10 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.stream.Collectors;
-
 @Tag(name = "Client", description = "Customer-related operations")
 @Slf4j
 @AllArgsConstructor
@@ -48,9 +49,11 @@ public class ClientController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list() {
+    public ResponseEntity<List<ClientResponse>> list() {
         return ResponseEntity.ok(
-                clientService.list().stream().map(ClientResponse::from).collect(Collectors.toList())
+                clientService.list().stream()
+                        .map(ClientResponse::from)
+                        .collect(Collectors.toList())
         );
     }
 
