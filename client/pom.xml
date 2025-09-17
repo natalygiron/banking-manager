@@ -52,8 +52,9 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.5.13</version>
+            <version>1.7.0</version>
         </dependency>
+
 
         <!-- TEST: deja que el starter gestione JUnit/Mockito/ByteBuddy -->
         <dependency>

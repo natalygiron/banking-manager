@@ -1,37 +1,64 @@
-openapi: 3.0.3
+openapi: 3.0.1
 info:
-  title: Client API
+  title: API de Clientes Bancarios
+  description: Servicio para gestionar los clientes de un sistema bancario
   version: 1.0.0
-  description: API para la gestión de clientes bancarios
   contact:
-    name: Nataly Girón
-    email: nataly@example.com
-
+    name: Equipo de Desarrollo Bancario
+    email: soporte@banco.com
 servers:
   - url: http://localhost:8080
     description: Servidor local de desarrollo
 
+tags:
+  - name: Cliente
+    description: Operaciones para gestión de clientes bancarios
+
 paths:
   /clientes:
     post:
-      summary: Crear cliente
+      tags: [Cliente]
+      summary: Registrar nuevo cliente
+      description: Crea un nuevo cliente en el sistema bancario
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateClientRequest'
+            examples:
+              ejemplo:
+                summary: Cliente nuevo
+                value:
+                  firstName: Juan
+                  lastName: Pérez
+                  email: juan.perez@example.com
+                  dni: 12345678
       responses:
-        '201':
-          description: Cliente creado
+        '200':
+          description: Cliente creado exitosamente
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientResponse'
+              examples:
+                ejemplo:
+                  summary: Respuesta de creación
+                  value:
+                    id: 1
+                    firstName: Juan
+                    lastName: Pérez
+                    email: juan.perez@example.com
+                    dni: 12345678
         '400':
           description: Datos inválidos
+        '500':
+          description: Error interno del servidor
+
     get:
+      tags: [Cliente]
       summary: Listar todos los clientes
+      description: Devuelve una lista de todos los clientes registrados
       responses:
         '200':
           description: Lista de clientes
@@ -41,10 +68,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ClientResponse'
+              examples:
+                ejemplo:
+                  summary: Lista de clientes
+                  value:
+                    - id: 1
+                      firstName: Juan
+                      lastName: Pérez
+                      email: juan.perez@example.com
+                      dni: 12345678
+                    - id: 2
+                      firstName: María
+                      lastName: Gómez
+                      email: maria.gomez@example.com
+                      dni: 87654321
 
   /clientes/{id}:
     get:
+      tags: [Cliente]
       summary: Obtener cliente por ID
+      description: Devuelve los datos de un cliente específico
       parameters:
         - name: id
           in: path
@@ -58,11 +101,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientResponse'
+              examples:
+                ejemplo:
+                  summary: Cliente existente
+                  value:
+                    id: 1
+                    firstName: Juan
+                    lastName: Pérez
+                    email: juan.perez@example.com
+                    dni: 12345678
         '404':
           description: Cliente no encontrado
 
     put:
-      summary: Actualizar cliente
+      tags: [Cliente]
+      summary: Actualizar cliente por ID
+      description: Actualiza todos los datos de un cliente existente
       parameters:
         - name: id
           in: path
@@ -75,16 +129,78 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateClientRequest'
+            examples:
+              ejemplo:
+                summary: Datos actualizados
+                value:
+                  firstName: Juan Carlos
+                  lastName: Pérez Soto
+                  email: juan.c.perez@example.com
       responses:
         '200':
           description: Cliente actualizado
-        '400':
-          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+              examples:
+                ejemplo:
+                  summary: Cliente actualizado
+                  value:
+                    id: 1
+                    firstName: Juan Carlos
+                    lastName: Pérez Soto
+                    email: juan.c.perez@example.com
+                    dni: 12345678
         '404':
           description: Cliente no encontrado
+        '409':
+          description: El correo electrónico ya está en uso
+        '400':
+          description: Datos inválidos
+
+    patch:
+      tags: [Cliente]
+      summary: Actualizar parcialmente cliente
+      description: Modifica algunos campos del cliente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchClientRequest'
+            examples:
+              ejemplo:
+                summary: Modificación parcial
+                value:
+                  email: juan.actualizado@example.com
+      responses:
+        '200':
+          description: Cliente modificado parcialmente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+              examples:
+                ejemplo:
+                  summary: Cliente modificado
+                  value:
+                    id: 1
+                    firstName: Juan
+                    lastName: Pérez
+                    email: juan.actualizado@example.com
+                    dni: 12345678
 
     delete:
-      summary: Eliminar cliente
+      tags: [Cliente]
+      summary: Eliminar cliente por ID
+      description: Elimina un cliente del sistema
       parameters:
         - name: id
           in: path
@@ -93,35 +209,72 @@ paths:
             type: integer
       responses:
         '204':
-          description: Cliente eliminado
-        '409':
-          description: Cliente tiene cuentas activas
-        '404':
-          description: Cliente no encontrado
+          description: Cliente eliminado exitosamente
 
 components:
   schemas:
     CreateClientRequest:
       type: object
-      properties:
-        firstName: { type: string }
-        lastName: { type: string }
-        email: { type: string, format: email }
-        dni: { type: string }
       required: [firstName, lastName, email, dni]
+      properties:
+        firstName:
+          type: string
+          description: Nombre del cliente
+        lastName:
+          type: string
+          description: Apellido del cliente
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del cliente
+        dni:
+          type: string
+          description: Documento Nacional de Identidad
 
     UpdateClientRequest:
       type: object
+      required: [firstName, lastName, email]
       properties:
-        firstName: { type: string }
-        lastName: { type: string }
-        email: { type: string, format: email }
+        firstName:
+          type: string
+          description: Nuevo nombre del cliente
+        lastName:
+          type: string
+          description: Nuevo apellido del cliente
+        email:
+          type: string
+          format: email
+          description: Nuevo correo electrónico
+
+    PatchClientRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Nombre actualizado
+        lastName:
+          type: string
+          description: Apellido actualizado
+        email:
+          type: string
+          format: email
+          description: Correo electrónico actualizado
 
     ClientResponse:
       type: object
       properties:
-        id: { type: integer }
-        firstName: { type: string }
-        lastName: { type: string }
-        email: { type: string }
-        dni: { type: string }
+        id:
+          type: integer
+          description: Identificador único del cliente
+        firstName:
+          type: string
+          description: Nombre del cliente
+        lastName:
+          type: string
+          description: Apellido del cliente
+        email:
+          type: string
+          description: Correo electrónico del cliente
+        dni:
+          type: string
+          description: Documento Nacional de Identidad
